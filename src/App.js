@@ -1,3 +1,4 @@
+import { FormatTypes } from '@ethersproject/abi';
 import { Alchemy, Network } from 'alchemy-sdk';
 import { useEffect, useState } from 'react';
 
@@ -21,16 +22,33 @@ const alchemy = new Alchemy(settings);
 
 function App() {
   const [blockNumber, setBlockNumber] = useState();
+  const [transactionsList, setTransactionsList] = useState();
 
   useEffect(() => {
     async function getBlockNumber() {
       setBlockNumber(await alchemy.core.getBlockNumber());
     }
+    async function getTransactions() {
+      const transactionsData = await alchemy.core.getBlock(blockNumber);
+      const transactionsArr = transactionsData.transactions.splice(0, 5)
+      setTransactionsList(transactionsArr.map((element, index) => {
+        return <li key={index}>{element}</li>
+      }))
+    }
 
     getBlockNumber();
-  });
+    getTransactions()
 
-  return <div className="App">Block Number: {blockNumber}</div>;
+  }, [blockNumber]);
+
+  return (
+    <>
+      <div className="App">Block Number: {blockNumber}</div>
+      <ul>{transactionsList}</ul>
+
+
+    </>
+  )
 }
 
 export default App;
